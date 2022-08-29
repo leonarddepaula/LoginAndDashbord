@@ -27,7 +27,7 @@ import { Sidebar } from "../../components/Sidebar";
 
                 <SimpleGrid minChildWidth='240px' spacing='8' w='100%'>
                    <Input name='password' type='password' label='Senha' />
-                   <Input name='password' type='password' label='Repita a senha' />
+                   <Input name='password' type='password' label='Confirme a senha' />
                 </SimpleGrid>
             </VStack>
 
