@@ -1,12 +1,42 @@
 import { Box, Button, Divider, Flex, Heading, HStack, Icon, SimpleGrid, VStack } from "@chakra-ui/react";
+import{FieldValues, SubmitHandler, useForm } from 'react-hook-form'
+import * as yup from 'yup'
 import Link from "next/link";
-import {  RiDeleteBin2Fill, RiSaveLine,  } from "react-icons/ri";
-import { Input } from "../../components/Form/Input";
+import { yupResolver } from '@hookform/resolvers/yup'
 
+import {  RiDeleteBin2Fill, RiSaveLine,  } from "react-icons/ri";
+
+import { Input } from "../../components/Form/Input";
 import { Header } from "../../components/Header";
 import { Sidebar } from "../../components/Sidebar";
+
+type CreateUserFormData = {
+  name: string;
+  email:string;
+  password: string;
+  password_confirmation: string;
+}
+
+const createUserFormSchema = yup.object().shape({
+  name: yup.string().required('Nome obrigatório'),
+  email: yup.string().required('E-mail obrigatório').email('E-mail inválido'),
+  password: yup.string().required('Senha orbigatória').min(6, 'minimo de 6 caracteres'),
+  password_confirmation: yup.string().oneOf([
+    null, yup.ref('password')
+  ], 'As senhas precisam ser iguais')
+})
   
   export default function CreateUser() {
+    const { register, handleSubmit, formState  } = useForm({
+      resolver: yupResolver(createUserFormSchema)
+    })
+    const { errors } = formState
+
+    const handleCreateUser: SubmitHandler<FieldValues> = async (values) =>{
+      await new Promise(resolve => setTimeout(resolve, 2000)) 
+
+      console.log(values)
+    }
     return (
       <Box>
         <Header />
@@ -14,7 +44,14 @@ import { Sidebar } from "../../components/Sidebar";
         <Flex w="100%" my="6" maxWidth={1480} mx="auto" px="6">
           <Sidebar />
   
-          <Box flex="1" borderRadius={8} bg="gray.800" p={["6","8"]}>
+          <Box 
+            as="form" 
+            flex="1" 
+            borderRadius={8} 
+            bg="gray.800" 
+            p={["6","8"]}
+            onSubmit={handleSubmit(handleCreateUser)}
+            >
             
             <Heading size='lg' fontWeight='normal'>Criar usuário</Heading>
 
@@ -22,13 +59,33 @@ import { Sidebar } from "../../components/Sidebar";
 
             <VStack spacing='8'>
                 <SimpleGrid minChildWidth='240px' spacing={["6","8"]}w='100%'>
-                   <Input name='name' label='Nome Completo' />
-                   <Input name='email' type='email' label='E-mail' />
+                   <Input 
+                    name='name' 
+                    label='Nome Completo' 
+                    error={errors.name}
+                    {...register}
+                    />
+                   <Input 
+                    name='email' 
+                    type='email' 
+                    label='E-mail'
+                    error={errors.email}
+                    {...register} />
                 </SimpleGrid>
 
                 <SimpleGrid minChildWidth='240px' spacing={["6","8"]}w='100%'>
-                   <Input name='password' type='password' label='Senha' />
-                   <Input name='password' type='password' label='Confirme a senha' />
+                   <Input 
+                    name='password' 
+                    type='password' 
+                    label='Senha' 
+                    error={errors.password}
+                    {...register}/>
+                   <Input 
+                    name='password' 
+                    type='password' 
+                    label='Confirme a senha'
+                    error={errors.password_confirmation}
+                    {...register}/>
                 </SimpleGrid>
             </VStack>
 
@@ -43,8 +100,10 @@ import { Sidebar } from "../../components/Sidebar";
                     </Button>
                    </Link>
                     <Button 
+                    type="submit"
                     colorScheme='pink'
                     leftIcon={<Icon as={RiSaveLine} fontSize='20' />}
+                    isLoading={formState.isSubmitting}
                     >
                         Salvar
                     </Button>
